@@ -32,4 +32,13 @@ check clean "Total leaks found:          0" "leaks free"
 check leaks "Total leaks found:          2" "Total leaks size:          25"
 check bad_free "Total leaks found:          1" "Bad frees found:            2"
 
+$CC $CFLAGS -DLEAK_HUNTER_STDERR -I"$root" "$root/tests/leaks.c" "$root/leak_hunter.c" -o "$tmp/stderr"
+(cd "$tmp" && rm -f leak.log && ./stderr 2> stderr.txt)
+if [ ! -e "$tmp/leak.log" ] && grep -qF "Total leaks found:          2" "$tmp/stderr.txt"; then
+	echo "ok   stderr"
+else
+	echo "FAIL stderr: report not on stderr or leak.log written"
+	status=1
+fi
+
 exit $status

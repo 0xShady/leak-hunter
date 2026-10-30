@@ -8,7 +8,9 @@
 
 # undef strdup
 
-# define OUTPUT_FILE_NAME       "leak.log"
+# ifndef OUTPUT_FILE_NAME
+#  define OUTPUT_FILE_NAME      "leak.log"
+# endif
 # define malloc(size)           lh_malloc(size, __FILE__, __LINE__)
 # define calloc(count, size)    lh_calloc(count, size, __FILE__, __LINE__)
 # define realloc(mem_ref, size) lh_realloc(mem_ref, size, __FILE__, __LINE__)

@@ -52,7 +52,7 @@ cc test.c leak_hunter.c -o test
 ./test
 ```
 
-The report is written to `leak.log` (change `OUTPUT_FILE_NAME` in `leak_hunter.h` to use another path):
+The report is written to `leak.log` (compile with `-DOUTPUT_FILE_NAME='"other.log"'` to use another path, or `-DLEAK_HUNTER_STDERR` to print it on stderr instead):
 
 ```log
 ┌─────────┤ LEAKS LOG ├─────────┐

@@ -1,32 +1,83 @@
 #include "leak_hunter.h"
 
-#undef	malloc
-#undef 	free
+#undef  malloc
+#undef  free
 
-t_list *mem_data = NULL;
-
-void	xfree(void *mem_ref)
+typedef struct s_lh_block
 {
-	delete_node(&mem_data, mem_ref);
-	free(mem_ref);
+	void				*address;
+	size_t				size;
+	const char			*file;
+	size_t				line;
+	struct s_lh_block	*next;
+}	t_lh_block;
+
+static t_lh_block	*g_head = NULL;
+static t_lh_block	*g_tail = NULL;
+
+static void	lh_add(void *address, size_t size, const char *file, size_t line)
+{
+	t_lh_block	*block;
+
+	if (!(block = malloc(sizeof(t_lh_block))))
+		return ;
+	block->address = address;
+	block->size = size;
+	block->file = file;
+	block->line = line;
+	block->next = NULL;
+	if (g_tail)
+		g_tail->next = block;
+	else
+		g_head = block;
+	g_tail = block;
 }
 
-void	*xmalloc(size_t size, char *file, size_t line)
+static int	lh_remove(void *address)
+{
+	t_lh_block	*block;
+	t_lh_block	*prev;
+
+	prev = NULL;
+	block = g_head;
+	while (block && block->address != address)
+	{
+		prev = block;
+		block = block->next;
+	}
+	if (!block)
+		return (0);
+	if (prev)
+		prev->next = block->next;
+	else
+		g_head = block->next;
+	if (g_tail == block)
+		g_tail = prev;
+	free(block);
+	return (1);
+}
+
+void	*lh_malloc(size_t size, const char *file, size_t line)
 {
 	void	*ptr;
-	t_list	*node;
 
 	ptr = malloc(size);
-	if (ptr != NULL && (node = create_node(ptr, size, line, file)))
-		lstadd_back(&mem_data, node);
+	if (ptr != NULL)
+		lh_add(ptr, size, file, line);
 	return (ptr);
 }
 
-void	print_mem_data(void)
+void	lh_free(void *mem_ref)
 {
-	t_list *tmp;
+	lh_remove(mem_ref);
+	free(mem_ref);
+}
 
-	tmp = mem_data;
+void	print_g_head(void)
+{
+	t_lh_block	*tmp;
+
+	tmp = g_head;
 	while (tmp)
 	{
 		printf("address: %p\n", tmp->address);
@@ -39,7 +90,7 @@ void	print_mem_data(void)
 
 void	leak_report(void)
 {
-	t_list	*tmp;
+	t_lh_block	*tmp;
 	FILE	*log;
 	size_t	leaks_size;
 	size_t	allocated_blocks;
@@ -48,7 +99,7 @@ void	leak_report(void)
 	allocated_blocks = 0;
 	if ((log = fopen(OUTPUT_FILE_NAME, "w")))
 	{
-		tmp = mem_data;
+		tmp = g_head;
 		while (tmp)
 		{
 			allocated_blocks++;
@@ -59,7 +110,7 @@ void	leak_report(void)
 		fprintf(log, "│ Total leaks found: %10zu │\n", allocated_blocks);
 		fprintf(log, "│ Total leaks size: %11zu │\n", leaks_size);
 		fprintf(log, "├───────────────────────────────┤\n");
-		tmp = mem_data;
+		tmp = g_head;
 		if (tmp)
 		{
 			while (tmp)

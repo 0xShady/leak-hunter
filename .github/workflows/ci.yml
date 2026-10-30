@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test
+      - run: make test CFLAGS="-Wall -Wextra -Werror -Wstrict-prototypes -g -fsanitize=address,undefined"
+        env:
+          ASAN_OPTIONS: detect_leaks=0

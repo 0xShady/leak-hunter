@@ -1,6 +1,6 @@
 #include "leak_hunter.h"
 
-int     main()
+int     main(void)
 {
 	atexit(leak_report);
 	char	*s = (char *)malloc(10);

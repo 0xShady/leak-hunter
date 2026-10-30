@@ -4,7 +4,7 @@
 
 Leak_Hunter records every `malloc`, `calloc`, `realloc` and `strdup` made by your code, with the file and line, and writes a report of what was never freed when your program exits. It also catches double frees and frees of pointers that were never allocated.
 
-No install, no external tools: two files to drop in your project.
+No install, no external tools: one header to drop in your project.
 
 ## What is a memory leak
 A memory leak happens when a program allocates memory and never releases it once it is no longer needed. More about [memory leaks](https://en.wikipedia.org/wiki/Memory_leak).
@@ -26,7 +26,7 @@ int     main(void)
 }
 ```
 
-1. Copy `leak_hunter.h` and `leak_hunter.c` into your project.
+1. Copy `leak_hunter.h` into your project.
 2. Include `leak_hunter.h` in your project's header (or in each `.c` file you want to track), **after** the system headers.
 3. Register the report at the start of `main`:
 
@@ -45,7 +45,16 @@ int     main(void)
 }
 ```
 
-4. Compile `leak_hunter.c` with your files and run:
+4. In **one** `.c` file (the one with `main` is a good choice), define `LEAK_HUNTER_IMPLEMENTATION` before the include:
+
+```c
+#define LEAK_HUNTER_IMPLEMENTATION
+#include "leak_hunter.h"
+```
+
+   Or compile the provided `leak_hunter.c`, which does exactly that, with your files.
+
+5. Compile and run:
 
 ```sh
 cc test.c leak_hunter.c -o test

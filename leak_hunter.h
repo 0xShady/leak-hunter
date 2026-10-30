@@ -28,7 +28,7 @@ void			delete_node(t_list** head, void *key);
 /*core functions*/
 void			*xmalloc(size_t size, char *file, size_t line);
 void			xfree(void *mem_ref);
-void			print_mem_data();
-void			leak_report();
+void			print_mem_data(void);
+void			leak_report(void);
 
 #endif /*LEAK_HUNTER_H*/

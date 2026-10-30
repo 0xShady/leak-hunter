@@ -13,15 +13,16 @@ void	xfree(void *mem_ref)
 
 void	*xmalloc(size_t size, char *file, size_t line)
 {
-	void *ptr;
+	void	*ptr;
+	t_list	*node;
 
 	ptr = malloc(size);
-	if (ptr != NULL)
-		lstadd_back(&mem_data, create_node(ptr, size, line, file));
+	if (ptr != NULL && (node = create_node(ptr, size, line, file)))
+		lstadd_back(&mem_data, node);
 	return (ptr);
 }
 
-void	print_mem_data()
+void	print_mem_data(void)
 {
 	t_list *tmp;
 
@@ -36,12 +37,12 @@ void	print_mem_data()
 	}
 }
 
-void	leak_report()
+void	leak_report(void)
 {
 	t_list	*tmp;
 	FILE	*log;
-	int		leaks_size;
-	int		allocated_blocks;
+	size_t	leaks_size;
+	size_t	allocated_blocks;
 
 	leaks_size = 0;
 	allocated_blocks = 0;
@@ -55,8 +56,8 @@ void	leak_report()
 			tmp = tmp->next;
 		}
 		fprintf(log, "┌─────────┤ LEAKS LOG ├─────────┐\n");
-		fprintf(log, "│ Total leaks found: %10d │\n", allocated_blocks);
-		fprintf(log, "│ Total leaks size: %11d │\n", leaks_size);
+		fprintf(log, "│ Total leaks found: %10zu │\n", allocated_blocks);
+		fprintf(log, "│ Total leaks size: %11zu │\n", leaks_size);
 		fprintf(log, "├───────────────────────────────┤\n");
 		tmp = mem_data;
 		if (tmp)
@@ -71,11 +72,10 @@ void	leak_report()
 					fprintf(log, "├───────────────────────────────┤\n");
 				tmp = tmp->next;
 			}
-			fprintf(log, "└───────────────────────────────┘");
 		}
 		else
 			fprintf(log, "│   your code is leaks free!!   │\n");
-			fprintf(log, "└───────────────────────────────┘");
+		fprintf(log, "└───────────────────────────────┘\n");
 		fclose(log);
 	}
 }

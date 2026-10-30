@@ -30,15 +30,21 @@ t_list  *create_node(void *address, size_t size, size_t line, char *file)
 	new->address = address;
 	new->size = size;
 	new->line = line;
-	new->file = strdup(file);
+	if (!(new->file = strdup(file)))
+	{
+		free(new);
+		return (NULL);
+	}
 	new->next = NULL;
 	return (new);
 }
 
 void    delete_node(t_list** head, void *key)
 {
-    t_list *tmp, *prev;
+    t_list *tmp;
+    t_list *prev;
 
+    prev = NULL;
     tmp = *head;
     if (tmp != NULL && tmp->address == key) {
         *head = tmp->next;
@@ -53,5 +59,6 @@ void    delete_node(t_list** head, void *key)
     if (tmp == NULL)
         return;
     prev->next = tmp->next;
+    free(tmp->file);
     free(tmp);
 }

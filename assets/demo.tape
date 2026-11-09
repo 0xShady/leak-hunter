@@ -4,7 +4,7 @@ Set Width 860
 Set Height 590
 Set Shell "bash"
 Set Theme "Catppuccin Mocha"
-Set FontFamily "FiraMono Nerd Font Mono"
+Set FontFamily "Menlo"
 Set FontSize 16
 Set Padding 24
 Set WindowBar Colorful

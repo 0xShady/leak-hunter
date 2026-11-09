@@ -85,6 +85,8 @@ The report is written to `leak.log` (compile with `-DOUTPUT_FILE_NAME='"other.lo
 └───────────────────────────────┘
 ```
 
+A file path longer than the column is cut from the left, so the file name stays visible: `…c/deeply/nested/util.c`.
+
 Once every block is freed:
 
 ```log

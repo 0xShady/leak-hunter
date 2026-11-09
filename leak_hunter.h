@@ -183,6 +183,37 @@ void	print_mem_data(void)
 	}
 }
 
+static size_t	lh_glyphs(const char *str)
+{
+	size_t	count;
+
+	count = 0;
+	while (*str)
+		if (((unsigned char)*str++ & 0xC0) != 0x80)
+			count++;
+	return (count);
+}
+
+static void	lh_print_file(FILE *log, const char *file)
+{
+	size_t	glyphs;
+
+	glyphs = lh_glyphs(file);
+	if (glyphs <= 23)
+	{
+		fprintf(log, "│ file: %*s%s │\n", (int)(23 - glyphs), "", file);
+		return ;
+	}
+	while (glyphs > 22)
+	{
+		file++;
+		while (((unsigned char)*file & 0xC0) == 0x80)
+			file++;
+		glyphs--;
+	}
+	fprintf(log, "│ file: …%s │\n", file);
+}
+
 static void	lh_print_blocks(FILE *log, t_lh_block *block, int with_size)
 {
 	while (block)
@@ -190,7 +221,7 @@ static void	lh_print_blocks(FILE *log, t_lh_block *block, int with_size)
 		fprintf(log, "│ address: %20p │\n", block->address);
 		if (with_size)
 			fprintf(log, "│ size (bytes): %15zu │\n", block->size);
-		fprintf(log, "│ file: %23s │\n", block->file);
+		lh_print_file(log, block->file);
 		fprintf(log, "│ line: %23zu │\n", block->line);
 		if (block->next)
 			fprintf(log, "├───────────────────────────────┤\n");

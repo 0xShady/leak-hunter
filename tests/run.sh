@@ -8,6 +8,10 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 status=0
 
+same_width() {
+	[ "$(perl -CSD -lne 'print length' "$1" | sort -u | wc -l | tr -d ' ')" = 1 ]
+}
+
 check() {
 	name=$1
 	shift
@@ -20,6 +24,10 @@ check() {
 			ok=0
 		fi
 	done
+	if ! same_width "$tmp/leak.log"; then
+		echo "FAIL $name: report rows have different widths"
+		ok=0
+	fi
 	if [ $ok -eq 1 ]; then
 		echo "ok   $name"
 	else
@@ -34,7 +42,7 @@ check bad_free "Total leaks found:          1" "Bad frees found:            2"
 
 $CC $CFLAGS -DLEAK_HUNTER_STDERR -I"$root" "$root/tests/leaks.c" "$root/leak_hunter.c" -o "$tmp/stderr"
 (cd "$tmp" && rm -f leak.log && ./stderr 2> stderr.txt)
-if [ ! -e "$tmp/leak.log" ] && grep -qF "Total leaks found:          2" "$tmp/stderr.txt"; then
+if [ ! -e "$tmp/leak.log" ] && grep -qF "Total leaks found:          2" "$tmp/stderr.txt" && same_width "$tmp/stderr.txt"; then
 	echo "ok   stderr"
 else
 	echo "FAIL stderr: report not on stderr or leak.log written"

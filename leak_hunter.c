@@ -186,8 +186,12 @@ void	leak_report(void)
 	leaks_size = 0;
 	allocated_blocks = 0;
 	bad_frees = 0;
+#ifdef LEAK_HUNTER_STDERR
+	log = stderr;
+#else
 	if (!(log = fopen(OUTPUT_FILE_NAME, "w")))
 		return ;
+#endif
 	tmp = g_live.head;
 	while (tmp)
 	{
@@ -217,5 +221,7 @@ void	leak_report(void)
 		lh_print_blocks(log, g_bad.head, 0);
 	}
 	fprintf(log, "└───────────────────────────────┘\n");
+#ifndef LEAK_HUNTER_STDERR
 	fclose(log);
+#endif
 }
